@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Тест — ГОС Менеджмент УЧР</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --card2: #263348;
+  --border: #334155;
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --yellow: #f59e0b;
+  --purple: #a855f7;
+  --text: #f1f5f9;
+  --sub: #94a3b8;
+  --radius: 14px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; font-family: -apple-system, 'Segoe UI', sans-serif; background:var(--bg); color:var(--text); }
+
+/* ===== SCREENS ===== */
+.screen { display:none; min-height:100vh; padding:16px; max-width:640px; margin:0 auto; }
+.screen.active { display:flex; flex-direction:column; }
+
+/* ===== HOME ===== */
+.home-header { text-align:center; padding:24px 0 20px; }
+.home-header h1 { font-size:22px; font-weight:800; line-height:1.3; }
+.home-header p { color:var(--sub); font-size:13px; margin-top:6px; }
+.badge { display:inline-block; background:var(--blue); color:#fff; font-size:11px; padding:2px 8px; border-radius:20px; margin-top:8px; font-weight:600; }
+
+.mode-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+.mode-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:18px 14px; cursor:pointer; transition:.15s; text-align:center; }
+.mode-card:active { transform:scale(.97); opacity:.85; }
+.mode-card .icon { font-size:32px; margin-bottom:8px; }
+.mode-card h3 { font-size:15px; font-weight:700; }
+.mode-card p { color:var(--sub); font-size:12px; margin-top:4px; line-height:1.4; }
+.mode-card.full { grid-column:1/-1; }
+.mode-card.green { border-color:var(--green); }
+.mode-card.blue { border-color:var(--blue); }
+.mode-card.yellow { border-color:var(--yellow); }
+.mode-card.purple { border-color:var(--purple); }
+
+.stats-bar { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-top:12px; display:flex; gap:16px; justify-content:center; }
+.stat { text-align:center; }
+.stat .val { font-size:22px; font-weight:800; }
+.stat .lbl { font-size:11px; color:var(--sub); }
+.stat.green .val { color:var(--green); }
+.stat.blue .val { color:var(--blue); }
+.stat.yellow .val { color:var(--yellow); }
+
+/* ===== TICKET SELECT ===== */
+.ticket-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:12px; }
+.ticket-btn { background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:14px 6px; text-align:center; cursor:pointer; font-weight:700; font-size:16px; transition:.15s; }
+.ticket-btn:active { transform:scale(.95); }
+.ticket-btn.done { border-color:var(--green); color:var(--green); }
+.ticket-btn.partial { border-color:var(--yellow); color:var(--yellow); }
+
+/* ===== TEST ===== */
+.test-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.btn-icon { background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:8px 12px; cursor:pointer; font-size:18px; }
+.btn-icon:active { opacity:.7; }
+.progress-wrap { flex:1; }
+.progress-info { display:flex; justify-content:space-between; font-size:12px; color:var(--sub); margin-bottom:4px; }
+.progress-bar { height:6px; background:var(--border); border-radius:10px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--blue); border-radius:10px; transition:width .4s; }
+.timer-badge { background:var(--card); border:1.5px solid var(--border); border-radius:8px; padding:4px 10px; font-size:13px; font-weight:700; min-width:52px; text-align:center; }
+.timer-badge.warn { border-color:var(--yellow); color:var(--yellow); }
+.timer-badge.danger { border-color:var(--red); color:var(--red); }
+
+.ticket-tag { font-size:11px; color:var(--sub); margin-bottom:8px; }
+.question-card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:14px; border:1.5px solid var(--border); }
+.question-text { font-size:16px; font-weight:600; line-height:1.5; }
+
+.options { display:flex; flex-direction:column; gap:10px; }
+.option { background:var(--card2); border:1.5px solid var(--border); border-radius:12px; padding:14px 16px; cursor:pointer; font-size:15px; line-height:1.4; transition:.15s; display:flex; align-items:flex-start; gap:12px; }
+.option:active { transform:scale(.99); }
+.option .opt-letter { font-weight:800; color:var(--blue); min-width:20px; }
+.option.correct { border-color:var(--green); background:rgba(34,197,94,.12); }
+.option.correct .opt-letter { color:var(--green); }
+.option.wrong { border-color:var(--red); background:rgba(239,68,68,.12); }
+.option.wrong .opt-letter { color:var(--red); }
+.option.disabled { cursor:default; opacity:.7; }
+
+.explanation { background:rgba(59,130,246,.1); border:1.5px solid var(--blue); border-radius:12px; padding:14px; font-size:13px; line-height:1.6; color:#bfdbfe; margin-top:12px; display:none; }
+.explanation.show { display:block; }
+.explanation b { color:#93c5fd; }
+
+.next-btn { background:var(--blue); color:#fff; border:none; border-radius:12px; padding:16px; font-size:16px; font-weight:700; cursor:pointer; width:100%; margin-top:14px; transition:.15s; }
+.next-btn:active { opacity:.85; transform:scale(.98); }
+.next-btn.green { background:var(--green); }
+
+/* ===== RESULT ===== */
+.result-card { background:var(--card); border-radius:var(--radius); padding:24px; text-align:center; margin-bottom:16px; }
+.result-emoji { font-size:56px; margin-bottom:12px; }
+.result-score { font-size:42px; font-weight:900; margin:8px 0; }
+.result-score.great { color:var(--green); }
+.result-score.ok { color:var(--yellow); }
+.result-score.bad { color:var(--red); }
+.result-label { color:var(--sub); font-size:14px; }
+.result-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:16px 0; }
+.result-stat { background:var(--card2); border-radius:10px; padding:12px; text-align:center; }
+.result-stat .n { font-size:22px; font-weight:800; }
+.result-stat .n.g { color:var(--green); }
+.result-stat .n.r { color:var(--red); }
+.result-stat .n.b { color:var(--blue); }
+.result-stat .t { font-size:11px; color:var(--sub); }
+
+.btn-row { display:flex; gap:10px; }
+.btn-outline { flex:1; border:1.5px solid var(--border); background:transparent; color:var(--text); border-radius:12px; padding:14px; font-size:15px; font-weight:600; cursor:pointer; }
+.btn-outline:active { opacity:.7; }
+.btn-primary { flex:1; background:var(--blue); color:#fff; border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:700; cursor:pointer; }
+.btn-primary:active { opacity:.85; }
+
+.wrongs-list { margin-top:16px; }
+.wrong-item { background:var(--card); border-radius:12px; padding:14px; margin-bottom:10px; border-left:3px solid var(--red); }
+.wrong-item .wq { font-size:13px; font-weight:600; margin-bottom:6px; }
+.wrong-item .wy { font-size:12px; color:var(--red); }
+.wrong-item .wc { font-size:12px; color:var(--green); margin-top:2px; }
+.wrong-item .we { font-size:12px; color:var(--sub); margin-top:6px; line-height:1.5; border-top:1px solid var(--border); padding-top:6px; }
+
+/* ===== FLASHCARDS ===== */
+.flash-nav { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.flash-counter { flex:1; text-align:center; font-size:13px; color:var(--sub); }
+.flash-scene { perspective:1200px; flex:1; min-height:260px; cursor:pointer; margin-bottom:14px; }
+.flash-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.4,0,.2,1); min-height:260px; }
+.flash-card.flipped { transform:rotateY(180deg); }
+.flash-face { position:absolute; width:100%; min-height:260px; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--radius); padding:24px 20px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; border:1.5px solid var(--border); }
+.flash-front { background:var(--card); }
+.flash-back { background:var(--card2); transform:rotateY(180deg); border-color:var(--blue); }
+.flash-hint { font-size:11px; color:var(--sub); margin-bottom:12px; text-transform:uppercase; letter-spacing:.8px; }
+.flash-q { font-size:16px; font-weight:700; line-height:1.5; }
+.flash-a { font-size:14px; line-height:1.6; color:#cbd5e1; }
+.flash-tag { font-size:11px; background:var(--blue); color:#fff; padding:3px 10px; border-radius:20px; margin-top:12px; }
+
+.flash-btns { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.flash-btn { border:1.5px solid var(--border); background:var(--card); color:var(--text); border-radius:12px; padding:13px 6px; font-size:14px; font-weight:600; cursor:pointer; }
+.flash-btn:active { opacity:.7; transform:scale(.97); }
+.flash-btn.bad { border-color:var(--red); color:var(--red); }
+.flash-btn.ok { border-color:var(--yellow); color:var(--yellow); }
+.flash-btn.good { border-color:var(--green); color:var(--green); }
+
+/* ===== CHEATSHEET ===== */
+.cheat-list { display:flex; flex-direction:column; gap:10px; }
+.cheat-item { background:var(--card); border-radius:12px; overflow:hidden; }
+.cheat-header { padding:12px 16px; font-weight:700; font-size:14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:3px solid var(--blue); }
+.cheat-body { padding:0 16px; max-height:0; overflow:hidden; transition:max-height .3s, padding .3s; }
+.cheat-body.open { max-height:1000px; padding:12px 16px; }
+.cheat-body p { font-size:13px; line-height:1.6; color:#cbd5e1; margin-bottom:6px; }
+.cheat-body b { color:var(--text); }
+.cheat-chevron { transition:transform .3s; }
+.cheat-chevron.open { transform:rotate(180deg); }
+
+/* ===== SHARED ===== */
+.screen-title { font-size:20px; font-weight:800; margin-bottom:4px; }
+.screen-sub { font-size:13px; color:var(--sub); margin-bottom:16px; }
+.back-row { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+.back-btn { background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:8px 14px; cursor:pointer; font-size:14px; font-weight:600; }
+.back-btn:active { opacity:.7; }
+.spacer { flex:1; }
+
+@media (min-width:640px) {
+  .mode-grid { grid-template-columns:repeat(2,1fr); }
+  .ticket-grid { grid-template-columns:repeat(5,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-header">
+    <h1>ГОС Экзамен<br>Менеджмент УЧР</h1>
+    <p>Тренажёр для подготовки</p>
+    <div class="badge" id="home-badge">20 билетов · 80 вопросов</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat green"><div class="val" id="stat-best">—</div><div class="lbl">Лучший %</div></div>
+    <div class="stat blue"><div class="val" id="stat-tests">0</div><div class="lbl">Тестов</div></div>
+    <div class="stat yellow"><div class="val" id="stat-streak">0</div><div class="lbl">Серия</div></div>
+  </div>
+
+  <div class="mode-grid" style="margin-top:16px">
+    <div class="mode-card green" onclick="startMode('random')">
+      <div class="icon">🎲</div>
+      <h3>Случайный тест</h3>
+      <p>20 вопросов из всех билетов</p>
+    </div>
+    <div class="mode-card blue" onclick="showScreen('screen-tickets')">
+      <div class="icon">📋</div>
+      <h3>По билету</h3>
+      <p>Выбери конкретный билет</p>
+    </div>
+    <div class="mode-card yellow" onclick="startMode('all')">
+      <div class="icon">⚡</div>
+      <h3>Полный тест</h3>
+      <p>Все 80 вопросов подряд</p>
+    </div>
+    <div class="mode-card purple" onclick="showScreen('screen-flash')">
+      <div class="icon">🃏</div>
+      <h3>Флеш-карточки</h3>
+      <p>Термины и определения</p>
+    </div>
+    <div class="mode-card full" onclick="showScreen('screen-cheat')" style="border-color:#64748b;">
+      <div class="icon">📖</div>
+      <h3>Шпаргалки по темам</h3>
+      <p>Быстрое повторение ключевых понятий</p>
+    </div>
+  </div>
+</div>
+
+<!-- TICKET SELECT -->
+<div class="screen" id="screen-tickets">
+  <div class="back-row">
+    <button class="back-btn" onclick="showScreen('screen-home')">← Назад</button>
+    <div class="spacer"></div>
+    <span style="font-size:13px;color:var(--sub)">Выбери билет</span>
+  </div>
+  <div class="screen-title">По билетам</div>
+  <div class="screen-sub">Тест из вопросов конкретного билета</div>
+  <div class="ticket-grid" id="ticket-grid"></div>
+</div>
+
+<!-- TEST -->
+<div class="screen" id="screen-test">
+  <div class="test-header">
+    <button class="btn-icon" onclick="exitTest()">✕</button>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="prog-text">1 / 20</span>
+        <span id="score-text">✓ 0</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="timer-badge" id="timer-badge">—</div>
+  </div>
+
+  <div class="ticket-tag" id="q-ticket-tag"></div>
+  <div class="question-card">
+    <div class="question-text" id="question-text"></div>
+  </div>
+  <div class="options" id="options"></div>
+  <div class="explanation" id="explanation"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()" style="display:none">Следующий →</button>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <div class="result-emoji" id="res-emoji"></div>
+    <div style="font-size:14px;color:var(--sub)">Результат</div>
+    <div class="result-score" id="res-score"></div>
+    <div class="result-label" id="res-label"></div>
+    <div class="result-grid">
+      <div class="result-stat"><div class="n g" id="res-correct"></div><div class="t">Правильно</div></div>
+      <div class="result-stat"><div class="n r" id="res-wrong"></div><div class="t">Неверно</div></div>
+      <div class="result-stat"><div class="n b" id="res-time"></div><div class="t">Время</div></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-outline" onclick="showScreen('screen-home')">На главную</button>
+    <button class="btn-primary" id="retry-btn" onclick="retryTest()">Повторить</button>
+  </div>
+  <div class="wrongs-list" id="wrongs-list"></div>
+</div>
+
+<!-- FLASHCARDS -->
+<div class="screen" id="screen-flash">
+  <div class="back-row">
+    <button class="back-btn" onclick="showScreen('screen-home')">← Назад</button>
+    <div class="spacer"></div>
+    <button class="btn-icon" onclick="shuffleFlash()">🔀</button>
+  </div>
+  <div class="screen-title">Флеш-карточки</div>
+  <div class="screen-sub">Нажми на карточку, чтобы перевернуть</div>
+
+  <div class="flash-nav">
+    <button class="btn-icon" onclick="prevFlash()">←</button>
+    <div class="flash-counter" id="flash-counter">1 / 40</div>
+    <button class="btn-icon" onclick="nextFlash()">→</button>
+  </div>
+
+  <div class="flash-scene" onclick="flipFlash()">
+    <div class="flash-card" id="flash-card">
+      <div class="flash-face flash-front">
+        <div class="flash-hint">Понятие / Термин</div>
+        <div class="flash-q" id="flash-q"></div>
+        <div class="flash-tag" id="flash-tag-f"></div>
+      </div>
+      <div class="flash-face flash-back">
+        <div class="flash-hint">Определение / Ответ</div>
+        <div class="flash-a" id="flash-a"></div>
+        <div class="flash-tag" id="flash-tag-b"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flash-btns">
+    <button class="flash-btn bad" onclick="rateFlash(0)">😕 Не знаю</button>
+    <button class="flash-btn ok" onclick="rateFlash(1)">🤔 Примерно</button>
+    <button class="flash-btn good" onclick="rateFlash(2)">✅ Знаю!</button>
+  </div>
+
+  <div class="stats-bar" style="margin-top:12px">
+    <div class="stat red" style="--red:#ef4444"><div class="val" id="flash-bad" style="color:var(--red)">0</div><div class="lbl">Не знаю</div></div>
+    <div class="stat yellow"><div class="val" id="flash-ok" style="color:var(--yellow)">0</div><div class="lbl">Примерно</div></div>
+    <div class="stat green"><div class="val" id="flash-good" style="color:var(--green)">0</div><div class="lbl">Знаю</div></div>
+  </div>
+</div>
+
+<!-- CHEATSHEET -->
+<div class="screen" id="screen-cheat">
+  <div class="back-row">
+    <button class="back-btn" onclick="showScreen('screen-home')">← Назад</button>
+  </div>
+  <div class="screen-title">Шпаргалки</div>
+  <div class="screen-sub">Нажми на тему чтобы раскрыть</div>
+  <div class="cheat-list" id="cheat-list"></div>
+</div>
+
+<script>
+// ================================================================
+// DATA — QUESTIONS
+// ================================================================
+const QUESTIONS = [
+// БИЛЕТ 1
+{t:1,q:"Кто является основоположниками классической теории менеджмента?",opts:["Э. Мэйо, А. Маслоу, Д. МакГрегор","Ф. Тейлор, А. Файоль, М. Вебер","В. Врум, Дж. Адамс, Э. Локк","Г. Минцберг, И. Ансофф, М. Портер"],ans:1,exp:"Классическая теория сложилась в конце XIX — начале XX вв. Тейлор — научный менеджмент, Файоль — 14 принципов, Вебер — бюрократия."},
+{t:1,q:"Сколько принципов управления сформулировал А. Файоль?",opts:["7","10","14","20"],ans:2,exp:"Файоль сформулировал 14 принципов: разделение труда, полномочия, дисциплина, единоначалие, единство направления и др."},
+{t:1,q:"Что такое 'бизнес-тенденция' в стратегическом анализе?",opts:["Временный рост продаж","Устойчивое направление изменений во внешней среде","Краткосрочный финансовый план","Метод оценки персонала"],ans:1,exp:"Бизнес-тенденция — устойчивое направление изменений во внешней среде: цифровизация, демографическое старение, 'зелёная' экономика."},
+{t:1,q:"Что обеспечивает принцип 'единоначалие' в классической теории?",opts:["Разделение труда между отделами","Каждый подчинённый получает указания только от одного руководителя","Контроль за выполнением плановых показателей","Материальное стимулирование"],ans:1,exp:"Единоначалие — один из 14 принципов Файоля: каждый сотрудник имеет только одного непосредственного начальника."},
+// БИЛЕТ 2
+{t:2,q:"В каком году возник научный менеджмент (школа Тейлора)?",opts:["1860-е","1880-е","1910-е","1930-е"],ans:1,exp:"Научный менеджмент Ф. Тейлора оформился в 1880-е годы. Его ключевые труды опубликованы в 1903 и 1911 годах."},
+{t:2,q:"Как матрица БКГ применяется в управлении персоналом?",opts:["Для оценки доли рынка продуктов","Для анализа кадрового портфеля по потенциалу и результативности","Для расчёта текучести кадров","Для построения организационной структуры"],ans:1,exp:"'Звёзды' — высокопотенциальные с высокой результативностью, 'дойные коровы' — опытные стабильные, 'вопросы' — новички с потенциалом, 'собаки' — низкорезультативные."},
+{t:2,q:"Чем отличается подход Тейлора от подхода Файоля?",opts:["Тейлор работал с финансами, Файоль — с персоналом","Тейлор — 'снизу вверх' (оптимизация операций), Файоль — 'сверху вниз' (принципы для всей организации)","Тейлор изучал мотивацию, Файоль — структуру","Оба подхода идентичны"],ans:1,exp:"Научный менеджмент Тейлора ориентирован на оптимизацию трудовых операций производственного персонала. Административная школа Файоля охватывает всю организацию сверху."},
+{t:2,q:"Что означает аббревиатура PEST в стратегическом анализе?",opts:["Производство, Экономика, Стратегия, Технологии","Политические, Экономические, Социальные, Технологические факторы","Персонал, Эффективность, Сбыт, Тактика","Планирование, Экология, Структура, Технологии"],ans:1,exp:"PEST — макросреда: Political (политические), Economic (экономические), Social (социальные), Technological (технологические) факторы."},
+// БИЛЕТ 3
+{t:3,q:"Какие стадии изменений выделил К. Левин?",opts:["Анализ, Планирование, Реализация","Размораживание, Движение, Замораживание","Диагностика, Внедрение, Контроль","Инициация, Трансформация, Стабилизация"],ans:1,exp:"Трёхступенчатая модель Левина: 1) Размораживание (осознание необходимости), 2) Движение (сам процесс), 3) Замораживание (закрепление)."},
+{t:3,q:"Какой подход к управлению персоналом рассматривает организацию как культурный феномен?",opts:["Экономический","Органический","Гуманистический","Административный"],ans:2,exp:"Гуманистический подход: организация — культурный феномен, человек — субъект с ценностями. Инструменты: корпоративная культура, ценностный менеджмент."},
+{t:3,q:"В чём особенность 'фланговой атаки' как наступательной стратегии?",opts:["Конкуренция по всем направлениям","Удар по слабым сторонам конкурента","Выход только на зарубежные рынки","Снижение цены на 50%"],ans:1,exp:"Фланговая атака — удар по слабым сторонам конкурента. Фронтальная — по всем направлениям, обходной манёвр — выход на новые сегменты."},
+{t:3,q:"Как строится стратегия по И. Ансоффу?",opts:["SWOT → Миссия → Цели → Варианты → Выбор → Реализация → Контроль","Анализ → Разработка → Утверждение","Бюджет → Персонал → Структура","Рынок → Продукт → Цена → Продвижение"],ans:0,exp:"Порядок по Ансоффу: анализ среды → миссия и видение → стратегические цели → варианты → оптимальный вариант → реализация → мониторинг."},
+// БИЛЕТ 4
+{t:4,q:"Какой способ разрешения конфликта наиболее эффективен для сложных противоречий?",opts:["Уклонение","Сглаживание","Принуждение","Сотрудничество"],ans:3,exp:"Сотрудничество (решение проблемы) — поиск выгодного обеим сторонам решения. Наиболее эффективно для сложных конфликтов."},
+{t:4,q:"Что применяют при принятии решений в условиях риска?",opts:["Только интуицию руководителя","Математическое ожидание и анализ чувствительности","Критерий Вальда","Метод Дельфи"],ans:1,exp:"Риск — известны вероятности исходов. Применяют матожидание и анализ чувствительности. При неопределённости — критерии Вальда, максимакс, Гурвича."},
+{t:4,q:"Какой вид адаптации отвечает за вхождение нового сотрудника в коллектив?",opts:["Профессиональная","Психофизиологическая","Социально-психологическая","Организационная"],ans:2,exp:"Социально-психологическая адаптация — принятие в коллектив, усвоение неформальных норм и правил группы."},
+{t:4,q:"Какой этап адаптации означает полное принятие ценностей организации?",opts:["Ознакомление","Приспособление","Ассимиляция","Идентификация"],ans:3,exp:"Этапы: ознакомление → приспособление → ассимиляция → идентификация (полное принятие ценностей и норм организации)."},
+// БИЛЕТ 5
+{t:5,q:"Что относится к дисфункциональным последствиям конфликта?",opts:["Выявление проблем, мешающих развитию","Рост текучести кадров и снижение производительности","Стимулирование инноваций","Улучшение коммуникации между отделами"],ans:1,exp:"Дисфункциональные последствия: снижение производительности, рост текучести, ухудшение морального климата, нарушение коммуникации."},
+{t:5,q:"На какой горизонт ориентирована функциональная стратегия?",opts:["До 1 года","1–3 года","5–10 лет","Свыше 10 лет"],ans:1,exp:"Функциональная стратегия: среднесрочный горизонт 1–3 года. Она детализирует деловую стратегию для конкретного функционального подразделения."},
+{t:5,q:"Сколько HR-специалистов требуется на крупном предприятии на 100 сотрудников?",opts:["0,2–0,5","1–1,5","3–4","7–10"],ans:1,exp:"Норматив: 1–1,5 HR-специалиста на 100 сотрудников. Конкретное число зависит от автоматизации и аутсорсинга."},
+{t:5,q:"Что отвечает операционная стратегия?",opts:["Что делать в функциональном блоке","Как делать в рамках функции","Зачем существует организация","Как привлечь инвестиции"],ans:1,exp:"Функциональная стратегия отвечает 'что делать', операционная — 'как делать' (конкретные процедуры и стандарты ежедневной работы)."},
+// БИЛЕТ 6
+{t:6,q:"В чём суть штабных полномочий?",opts:["Право отдавать обязательные приказы всем сотрудникам","Право давать рекомендации линейным руководителям без обязательного исполнения","Право принимать финансовые решения","Право нанимать и увольнять персонал"],ans:1,exp:"Штабные (рекомендательные) полномочия: специалисты готовят рекомендации, а решение принимает линейный руководитель. Сохраняется единоначалие."},
+{t:6,q:"Кто такие стейкхолдеры?",opts:["Только акционеры компании","Все заинтересованные стороны: сотрудники, клиенты, поставщики, государство","Топ-менеджеры организации","Конкуренты компании"],ans:1,exp:"Стейкхолдеры — все заинтересованные стороны: акционеры, сотрудники, клиенты, поставщики, государство, общество. Стратегия должна балансировать их интересы."},
+{t:6,q:"Какая модель карьеры характерна для японского менеджмента?",opts:["Трамплин","Лестница","Змея","Перепутье"],ans:2,exp:"'Змея' — горизонтальное перемещение между подразделениями с последующим вертикальным продвижением. Развивает широкий кругозор. Характерна для Японии."},
+{t:6,q:"Что такое ключевые компетенции фирмы по Прахаладу и Хамелу?",opts:["Список обязанностей сотрудников","Уникальные способности, трудно имитируемые конкурентами, создающие ценность","Финансовые показатели компании","Набор стандартных управленческих функций"],ans:1,exp:"Ключевые компетенции (core competencies) — уникальные способности организации, трудно копируемые конкурентами, открывающие доступ к широкому кругу рынков."},
+// БИЛЕТ 7
+{t:7,q:"Что повышает групповую сплочённость?",opts:["Большой размер группы (20+ человек)","Малый размер группы, общие ценности, совместные успехи","Высокая текучесть кадров","Конкуренция внутри группы"],ans:1,exp:"Факторы сплочённости: малый размер группы, частота взаимодействия, схожесть ценностей, наличие общего врага/угрозы, совместные победы."},
+{t:7,q:"Как рассчитывается комплексный показатель эффективности персонала?",opts:["Среднее арифметическое всех показателей","КП = Σ (Кi × Wi), где Кi — нормированный показатель, Wi — вес","Отношение выручки к численности","Разница между плановой и фактической производительностью"],ans:1,exp:"КП = Σ (Кi × Wi). Нормируется каждый показатель (факт/план × 100%). Взвешенная сумма. КП ≥ 1,0 — план выполнен."},
+{t:7,q:"Сколько стадий включает организационное проектирование СУП?",opts:["3","5","7","10"],ans:2,exp:"7 стадий: анализ существующей системы → концепция → функциональная структура → регламенты → должностные инструкции → пилот → полное внедрение."},
+{t:7,q:"Что означает eNPS?",opts:["Отношение прибыли к численности","Индекс лояльности сотрудников (Employee Net Promoter Score)","Норма выработки на сотрудника","Коэффициент текучести кадров"],ans:1,exp:"eNPS (Employee Net Promoter Score) — индекс готовности сотрудников рекомендовать компанию как место работы. Один из ключевых HR-показателей."},
+// БИЛЕТ 8
+{t:8,q:"По модели Камерона и Куинна (OCAI), какая культура ориентирована на инновации и риск?",opts:["Клановая","Адхократическая","Рыночная","Иерархическая"],ans:1,exp:"Адхократическая культура: динамизм, новаторство, предпринимательство, готовность к риску. Клановая — семейность, рыночная — результат, иерархическая — порядок."},
+{t:8,q:"Чем характеризуется 'предпринимательский' вид стратегических решений?",opts:["Основан на детальном анализе и формальных процедурах","Принимается интуитивно лидером в условиях неопределённости","Является реактивным ответом на возникшие проблемы","Разрабатывается коллегиально всем топ-менеджментом"],ans:1,exp:"Предпринимательские решения — интуиция и видение лидера, характерны для стартапов и малого бизнеса. Адаптивные — реактивные. Планирующие — формальные."},
+{t:8,q:"Что включает ассессмент-центр при отборе персонала?",opts:["Только проверку документов","Комплексную оценку через упражнения, кейсы, ролевые игры под наблюдением экспертов","Только психологическое тестирование","Только структурированное интервью"],ans:1,exp:"Ассессмент-центр — комплексный метод оценки: деловые игры, кейсы, презентации, тесты, интервью. Используется для ключевых позиций."},
+{t:8,q:"Сколько времени занимает изменение организационной культуры?",opts:["1–2 месяца","1 год","5–10 лет","Около 3 лет"],ans:2,exp:"Изменение культуры — длительный процесс (5–10 лет): кризис → новое видение → обучение новым ценностям → закрепление в практике."},
+// БИЛЕТ 9
+{t:9,q:"Согласно теории ожиданий В. Врума, мотивация равна:",opts:["Потребность × Возможность","Ожидание × Инструментальность × Валентность","Сила мотива / Уровень затрат","Цель × Трудность × Способности"],ans:1,exp:"Формула Врума: М = Ожидание (усилие → результат) × Инструментальность (результат → вознаграждение) × Валентность (ценность вознаграждения)."},
+{t:9,q:"Что такое 'профессиональная адаптация'?",opts:["Привыкание к режиму и физическим условиям труда","Освоение обязанностей, знаний и профессиональных навыков","Принятие в коллектив и усвоение неформальных норм","Понимание структуры и правил организации"],ans:1,exp:"Профессиональная адаптация — усвоение должностных обязанностей и профессиональных навыков. Психофизиологическая — режим и условия. Социальная — коллектив."},
+{t:9,q:"Теория потребностей МакКлелланда выделяет три потребности:",opts:["Физиологические, безопасность, социальные","Достижение, власть, принадлежность","Гигиенические факторы и мотиваторы","Ожидание, инструментальность, валентность"],ans:1,exp:"МакКлелланд: потребность в достижении (достигать целей), власти (влиять) и принадлежности (быть в группе). Важны в мотивации менеджеров."},
+{t:9,q:"Что определяет 'стратегический потенциал' организации?",opts:["Только финансовые резервы","Совокупность ресурсов и компетенций, обеспечивающих конкурентное преимущество","Количество патентов компании","Число сотрудников в организации"],ans:1,exp:"Стратегический потенциал — ресурсы + ключевые компетенции + организационные способности, создающие устойчивое конкурентное преимущество."},
+// БИЛЕТ 10
+{t:10,q:"Какие коммуникации называются 'неформальными'?",opts:["Письменные приказы и регламенты","Слухи, 'виноградная лоза', неофициальное общение","Вертикальные нисходящие сообщения","Официальная переписка по электронной почте"],ans:1,exp:"Неформальные коммуникации — слухи, 'виноградная лоза'. Формальные — регламентированные: приказы, отчёты, переписка по установленным каналам."},
+{t:10,q:"Что такое конкурентное преимущество по М. Портеру?",opts:["Высокий доход компании за прошлый год","Осознанный выбор уникальной позиции, где виды деятельности дополняют друг друга","Низкие операционные затраты","Большой штат сотрудников"],ans:1,exp:"По Портеру, стратегия — это осознанный выбор уникальной позиции. Операционная эффективность (делать то же лучше) — не стратегия."},
+{t:10,q:"Что включает функционально-целевая модель управления?",opts:["Только финансовое планирование","Иерархию взаимосвязанных функций и целей от стратегических до операционных","Список компетенций HR-специалиста","Схему документооборота организации"],ans:1,exp:"Функционально-целевая модель: верхний уровень — стратегические цели, нижние — функции подразделений. Каждая функция имеет измеримый результат."},
+{t:10,q:"Что такое EVP (Employer Value Proposition)?",opts:["Коэффициент эффективности вложений","Ценностное предложение работодателя — что компания предлагает сотрудникам в обмен на труд","Система оценки руководителей","Норматив численности персонала"],ans:1,exp:"EVP — ценностное предложение работодателя: зарплата, карьера, культура, развитие, условия труда. Ключевой инструмент маркетинга персонала."},
+// БИЛЕТ 11
+{t:11,q:"Что такое принцип 'диапазона контроля'?",opts:["Максимальная дистанция управления (регион → офис)","Оптимальное число подчинённых у одного руководителя (5–7)","Срок полномочий руководителя","Количество уровней иерархии"],ans:1,exp:"Диапазон контроля — оптимальное число прямых подчинённых. Норма: 5–7 человек. Слишком широкий диапазон ведёт к перегрузке, слишком узкий — к бюрократизации."},
+{t:11,q:"Что такое SMART-цели?",opts:["Простые, Мотивирующие, Амбициозные, Реальные, Тактические","Specific, Measurable, Achievable, Relevant, Time-bound","Stategic, Management, Action, Result, Time","Системные, Методические, Аналитические, Реализуемые, Тактические"],ans:1,exp:"SMART: Specific (конкретная), Measurable (измеримая), Achievable (достижимая), Relevant (актуальная), Time-bound (ограниченная во времени)."},
+{t:11,q:"Что такое метод SPACE-анализа?",opts:["Анализ конкурентов по ценовой политике","Оценка по осям финансовой силы, конкурентного преимущества, стабильности среды и силы отрасли","Метод подбора персонала","Способ оценки удовлетворённости клиентов"],ans:1,exp:"SPACE-анализ: 4 оси — финансовая сила (FS), конкурентное преимущество (CA), стабильность среды (ES), сила отрасли (IS). Формирует стратегическую позицию."},
+{t:11,q:"Что такое закономерность 'первичности функций' в СУП?",opts:["Функции важнее целей","Сначала определяются функции, затем под них строится структура","Структура определяет функции","Функции и структура разрабатываются одновременно"],ans:1,exp:"Принцип первичности функций: сначала определяются необходимые функции управления персоналом, затем под них формируется организационная структура."},
+// БИЛЕТ 12
+{t:12,q:"Какой метод преодоления сопротивления изменениям Коттер назвал наиболее распространённым?",opts:["Принуждение","Манипуляция","Образование и коммуникация","Переговоры"],ans:2,exp:"Образование и коммуникация — объяснение причин и необходимости изменений. Принуждение — только в кризисных ситуациях как крайняя мера."},
+{t:12,q:"Чем отличается HRM от научного администрирования Тейлора?",opts:["HRM сосредоточен на нормировании труда","HRM рассматривает человека как стратегический актив, ориентирован на долгосрочный потенциал","HRM применяет только экономические методы","Различий нет, это одно и то же"],ans:1,exp:"Тейлор: человек — 'экономический' субъект, нормирование и контроль. HRM: человек — стратегический актив, развитие, вовлечённость, долгосрочный потенциал."},
+{t:12,q:"Что такое пассивное сопротивление изменениям?",opts:["Открытые жалобы и забастовки","Снижение производительности, уклонение, имитация деятельности","Саботаж оборудования","Открытая критика руководства"],ans:1,exp:"Пассивное сопротивление: снижение производительности, уклонение, имитация активности. Активное: критика, саботаж, жалобы, забастовки."},
+{t:12,q:"Какой недостаток имеют инструменты стратегического управления?",opts:["Они слишком просты в применении","Трудоёмкость сбора данных и субъективность экспертных оценок","Не используются в крупных компаниях","Нельзя применять в условиях кризиса"],ans:1,exp:"Недостатки: трудоёмкость, субъективность, 'паралич анализа', устаревание данных, необходимость специальных компетенций для применения."},
+// БИЛЕТ 13
+{t:13,q:"Что такое 'связанная диверсификация'?",opts:["Вход в совершенно иные отрасли (конгломерат)","Вход в близкие по технологии или рынкам отрасли с использованием существующих компетенций","Расширение продуктовой линейки в рамках одной отрасли","Продажа дочерних компаний"],ans:1,exp:"Связанная (родственная) диверсификация — вход в смежные отрасли. Несвязанная — конгломерат (совсем разные отрасли). Синергия выше у связанной."},
+{t:13,q:"Теория организации находится на стыке каких наук?",opts:["Математики и физики","Социологии, психологии, экономики и теории управления","Биологии и медицины","Истории и философии"],ans:1,exp:"Теория организации — межотраслевая дисциплина на стыке социологии, психологии, экономики и теории управления. Методологическая основа менеджмента."},
+{t:13,q:"Что такое 'психологические методы' управления персоналом?",opts:["Штрафы и депремирование","Приказы и должностные инструкции","Коучинг, снижение стресса, психологический климат","Нормирование труда"],ans:2,exp:"Психологические методы: психологический климат, мотивационное консультирование, коучинг, снижение стресса. Формируют вовлечённость и удовлетворённость."},
+{t:13,q:"Что включает жизненный цикл организации?",opts:["Только рост и спад","Рождение, рост, зрелость, упадок / обновление","Создание, продажа, ликвидация","Планирование, реализация, оценка"],ans:1,exp:"Жизненный цикл: рождение → рост → зрелость → упадок (или обновление). Организация как открытая система взаимодействует со средой на всех стадиях."},
+// БИЛЕТ 14
+{t:14,q:"Какие роли менеджера выделил Г. Минцберг?",opts:["Производственные, финансовые, кадровые","Межличностные, информационные, решений","Оперативные, тактические, стратегические","Лидерские, экспертные, контрольные"],ans:1,exp:"Минцберг: межличностные (лидер, связной), информационные (приёмник, распространитель, пресс-агент), роли принятия решений (предприниматель, устранитель нарушений и др.)."},
+{t:14,q:"В чём ключевое отличие предпринимателя от менеджера?",opts:["Предприниматель работает по найму, менеджер — нет","Предприниматель несёт имущественный риск и является собственником","Менеджер создаёт новые рынки, предприниматель — нет","Различий нет"],ans:1,exp:"Предприниматель: собственник, несёт имущественный риск, создаёт возможности. Менеджер: наёмный работник, управляет в заданных параметрах."},
+{t:14,q:"Каков норматив численности HR-специалистов?",opts:["1 на 10 сотрудников","1–1,5 на 100 сотрудников","5 на 100 сотрудников","1 на 1000 сотрудников"],ans:1,exp:"Норматив: 1–1,5 HR-специалиста на 100 сотрудников. Зависит от автоматизации HR-процессов, аутсорсинга и модели организации HR-функции."},
+{t:14,q:"Что такое плановый подход к формированию стратегии УЧР?",opts:["Случайный подбор персонала","Систематический анализ → цели → HR-программы на 3–5 лет","Реакция на кризисные ситуации","Полная децентрализация кадровых решений"],ans:1,exp:"Плановый подход: систематический процесс — анализ → цели → HR-программы на 3–5 лет. Обеспечивает согласованность с бизнес-стратегией. Для крупных стабильных организаций."},
+// БИЛЕТ 15
+{t:15,q:"Какая функция менеджмента первой в списке Файоля?",opts:["Организация","Мотивация","Планирование","Контроль"],ans:2,exp:"Общие функции по Файолю: 1) Планирование, 2) Организация, 3) Координирование, 4) Мотивация, 5) Контроль. Планирование — основа управленческого цикла."},
+{t:15,q:"Чем отличается стратегическое планирование от принятия стратегических решений?",opts:["Они идентичны","Планирование — системный проактивный процесс, решения — ситуативный выбор из альтернатив","Планирование охватывает только финансы","Решения принимаются только топ-менеджментом"],ans:1,exp:"Планирование — проактивное создание образа будущего. Принятие решений — выбор из альтернатив в конкретный момент. Планирование создаёт рамки для решений."},
+{t:15,q:"Что означает оценка КПЭ руководителя ≥ 0,8?",opts:["Низкая эффективность","Средняя эффективность","Высокая эффективность","Критическая ситуация, нужно уволить"],ans:2,exp:"Шкала: ≥ 0,8 — высокая эффективность; 0,6–0,79 — средняя; < 0,6 — низкая. КПЭ = взвешенная сумма нормированных показателей."},
+{t:15,q:"Что такое 'оценка 360 градусов'?",opts:["Ежеквартальная финансовая проверка","Обратная связь от коллег, подчинённых, руководителя и клиентов","Аудит всех бизнес-процессов","Ежегодная инвентаризация"],ans:1,exp:"Метод 360°: обратная связь одновременно от руководителя, коллег, подчинённых и клиентов. Даёт полную картину поведения и компетенций сотрудника."},
+// БИЛЕТ 16
+{t:16,q:"Что характерно для японской модели менеджмента?",opts:["Высокая мобильность кадров и краткосрочные контракты","Пожизненный найм, ротация должностей, решения консенсусом","Жёсткая индивидуальная ответственность","Акцент на квартальных финансовых результатах"],ans:1,exp:"Японская модель: пожизненный найм, медленное продвижение, ротация (модель 'змея'), решения консенсусом (ринги/немаваши), групповая работа, лояльность компании."},
+{t:16,q:"Что такое модель трёх столпов Ульриха?",opts:["Три уровня иерархии: топ, средний, операционный","Стратегические партнёры + центры компетенций + HR shared services","Три функции HR: найм, обучение, увольнение","Три метода оценки: тест, интервью, наблюдение"],ans:1,exp:"Модель Ульриха: HR бизнес-партнёры (стратегический уровень) + центры экспертизы + центры обслуживания (HR Shared Services). Разделяет стратегические и операционные функции."},
+{t:16,q:"В чём сила американской модели менеджмента?",opts:["Управление качеством и кайдзен","Инновации, предпринимательство, гибкость кадров","Командная работа и наставничество","Пожизненный найм"],ans:1,exp:"Американская модель сильна в инновациях и предпринимательстве. Японская — в управлении качеством (кайдзен, 5S, lean) и стабильности персонала."},
+{t:16,q:"Как определяется количественная потребность методом нормирования?",opts:["Экспертный опрос руководителей","Объём работ / норма выработки","Регрессионный анализ по продажам","Метод Дельфи"],ans:1,exp:"Метод нормирования: плановый объём работ делится на норму выработки одного сотрудника. Прост и точен при стабильных нормах."},
+// БИЛЕТ 17
+{t:17,q:"По иерархии Маслоу, какая потребность находится на вершине?",opts:["Физиологическая","Безопасность","Социальная","Самоактуализация"],ans:3,exp:"Иерархия Маслоу (снизу): физиологические → безопасность → социальные → уважение → самоактуализация. Низшие потребности должны быть удовлетворены первыми."},
+{t:17,q:"Что такое глобальная стратегия на внешнем рынке?",opts:["Адаптация продукта к каждому национальному рынку","Стандартизация продукта и операций, централизованное управление, экономия на масштабе","Полная децентрализация управления","Отказ от выхода на иностранные рынки"],ans:1,exp:"Глобальная стратегия: стандартизация + централизация + экономия масштаба. Многонациональная: адаптация к каждому рынку. Транснациональная — баланс обоих."},
+{t:17,q:"Что такое внутренний маркетинг персонала?",opts:["Реклама вакансий на работных сайтах","Повышение удовлетворённости и лояльности существующих сотрудников","Продвижение HR-бренда в социальных сетях","Найм сотрудников из числа студентов"],ans:1,exp:"Внутренний маркетинг — удержание и удовлетворённость существующих. Внешний — привлечение новых кандидатов через бренд работодателя (EVP)."},
+{t:17,q:"Что такое стратегический альянс?",opts:["Враждебное поглощение конкурента","Долгосрочное соглашение о сотрудничестве при сохранении независимости компаний","Полное слияние двух компаний","Временный проект без юридического оформления"],ans:1,exp:"Стратегический альянс: долгосрочное сотрудничество (совместные предприятия, лицензии, консорциумы, франчайзинг) при сохранении юридической независимости партнёров."},
+// БИЛЕТ 18
+{t:18,q:"Что доказали Хоторнские эксперименты Э. Мэйо?",opts:["Нормирование труда повышает производительность","Производительность зависит не только от условий труда, но и от социальных отношений","Материальное стимулирование — единственный мотиватор","Иерархия важнее командной работы"],ans:1,exp:"Хоторнские эксперименты (1927–1932): социальные отношения и внимание к рабочим влияли на производительность сильнее, чем физические условия труда."},
+{t:18,q:"Что означает решение аттестационной комиссии 'условно соответствует'?",opts:["Сотрудника немедленно увольняют","Сотруднику даётся время (обычно 6–12 мес.) для устранения выявленных недостатков","Сотрудника повышают в должности","Зарплата сотрудника снижается"],ans:1,exp:"Три варианта решения аттестации: 'соответствует', 'условно соответствует' (есть замечания, даётся время) и 'не соответствует' (основание для кадровых решений)."},
+{t:18,q:"Что такое стратегический разрыв в SWOT-анализе?",opts:["Разница в зарплате между сотрудниками","Несоответствие между текущими возможностями и требуемой стратегической позицией","Конфликт между отделами","Нарушение трудового законодательства"],ans:1,exp:"Стратегический разрыв: периодический SWOT выявляет несоответствие между текущим потенциалом (SW) и требованиями среды (OT). Зона WT — приоритет для устранения."},
+{t:18,q:"Как часто проводится плановая (очередная) аттестация персонала?",opts:["Ежемесячно","Ежегодно","Раз в 3–5 лет","Раз в 10 лет"],ans:2,exp:"Плановая (очередная) аттестация: 1 раз в 3–5 лет. Досрочная — при изменении должности или по инициативе руководителя. После испытательного срока — отдельный вид."},
+// БИЛЕТ 19
+{t:19,q:"Что является целью некоммерческой организации?",opts:["Максимизация прибыли","Выплата дивидендов акционерам","Достижение социальных, благотворительных или образовательных целей","Захват доли рынка"],ans:2,exp:"Некоммерческие организации (НКО, фонды, ассоциации, гос. учреждения): цель — социальный результат, не прибыль. Оценивают эффективность через социальный эффект."},
+{t:19,q:"Что защищает действующих участников отрасли от новых конкурентов?",opts:["Низкие цены","Барьеры входа: масштаб, патенты, капитал, каналы сбыта","Государственные субсидии","Высокая текучесть кадров"],ans:1,exp:"Барьеры входа: эффект масштаба, дифференциация бренда, потребность в капитале, доступ к каналам сбыта, патенты, государственное регулирование, опытная кривая."},
+{t:19,q:"Что такое метод Дельфи в кадровом планировании?",opts:["Математический расчёт нормы выработки","Итеративный опрос экспертов с обратной связью для достижения консенсуса","Экстраполяция исторических данных","Регрессионный анализ"],ans:1,exp:"Метод Дельфи: последовательные раунды анонимного опроса экспертов с предоставлением обобщённых результатов. Используется при нестабильности данных."},
+{t:19,q:"Как товары-субституты влияют на отрасль по Портеру?",opts:["Повышают входные барьеры","Ограничивают максимальный уровень цен в отрасли","Увеличивают рентабельность","Не оказывают влияния"],ans:1,exp:"Субституты ограничивают потолок цен: при росте цен потребители переключаются на заменители. Угроза высока при улучшении соотношения цена/качество субститута."},
+// БИЛЕТ 20
+{t:20,q:"Какое преимущество имеет количественная теория менеджмента перед бихевиоризмом?",opts:["Лучше учитывает человеческий фактор","Объективность, измеримость, оптимизация при большом числе переменных","Проще в применении для рядовых менеджеров","Не требует специальных знаний"],ans:1,exp:"Количественная теория: объективность, математическая оптимизация, обработка больших данных. Недостаток — игнорирование человеческого фактора."},
+{t:20,q:"Какая деловая стратегия требует творческих высококвалифицированных сотрудников?",opts:["Лидерство по издержкам","Дифференциация","Фокусирование на низком сегменте","Стратегия ликвидации"],ans:1,exp:"Дифференциация требует творческих, инновационных, высококвалифицированных кадров. Лидерство по издержкам — производительных и управляемых. HR-стратегия следует за деловой."},
+{t:20,q:"Что такое метод MBO (Management by Objectives)?",opts:["Метод нормирования рабочего времени","Управление по целям: совместная постановка измеримых целей и оценка по их достижению","Метод отбора персонала","Система контроля качества"],ans:1,exp:"MBO (Друкер): менеджер и подчинённый совместно определяют конкретные измеримые цели. Оценка — по степени достижения. Повышает мотивацию и ответственность."},
+{t:20,q:"Чем отличается деловая оценка персонала от аттестации?",opts:["Аттестация проводится чаще","Оценка может быть неформальной, более частой, ориентированной на развитие, а не только соответствие","Различий нет","Аттестация оценивает только руководителей"],ans:1,exp:"Аттестация — формальная, юридически значимая, 1 раз в 3–5 лет. Деловая оценка — может быть неформальной, частой (ежеквартально), ориентирована на развитие."}
+];
+
+// ================================================================
+// FLASHCARDS
+// ================================================================
+const FLASHCARDS = [
+  {q:"Теория менеджмента",a:"Система научных знаний об управлении организациями, закономерностях их функционирования и методах достижения целей. Виды: классическая, бихевиористская, количественная, системная, ситуационная.",tag:"Б1 — Теория менеджмента"},
+  {q:"Классическая теория менеджмента",a:"Тейлор, Файоль, Вебер. Ключевые принципы: разделение труда, единоначалие, скалярная цепочка, нормирование труда, материальное стимулирование. 14 принципов Файоля.",tag:"Б1 — Теория"},
+  {q:"PEST / PESTEL анализ",a:"Анализ макросреды: Political, Economic, Social, Technological (+ Environmental, Legal). Выявляет возможности и угрозы из внешней среды.",tag:"Б1 — Стратегический анализ"},
+  {q:"Бизнес-тенденция",a:"Устойчивое направление изменений во внешней среде (цифровизация, демографическое старение, 'зелёная' экономика). Определяет долгосрочный вектор отрасли.",tag:"Б1 — Стратегический анализ"},
+  {q:"Методы управления персоналом",a:"1) Экономические (зарплата, премии) — высокий эффект, но требуют нематериального дополнения. 2) Административные (приказы, регламенты) — порядок, снижают инициативу. 3) Соц.-психологические (культура, наставничество) — лояльность, трудно измерить.",tag:"Б1, Б3, Б12 — УП"},
+  {q:"Матрица БКГ в управлении персоналом",a:"'Звёзды' — высокий потенциал + высокая результативность. 'Дойные коровы' — опытные стабильные. 'Вопросы' — новички с потенциалом. 'Собаки' — низкорезультативные без перспектив.",tag:"Б2 — Стратегический анализ"},
+  {q:"Пять сил конкуренции М. Портера",a:"1) Соперничество конкурентов. 2) Угроза новых игроков. 3) Угроза субститутов. 4) Власть поставщиков. 5) Власть покупателей. Определяют рентабельность отрасли.",tag:"Б2, Б19 — Стратегия"},
+  {q:"Модель Левина (изменения)",a:"Три стадии: 1) Размораживание (осознание необходимости). 2) Движение (реализация). 3) Замораживание (закрепление в стандартах и культуре).",tag:"Б3, Б12 — Изменения"},
+  {q:"Наступательные стратегии",a:"1) Фронтальная атака — по всем направлениям. 2) Фланговая — удар по слабостям конкурента. 3) Обходной манёвр — новые сегменты. 4) Партизанская — нишевые действия.",tag:"Б3 — Стратегия"},
+  {q:"Три подхода к управлению персоналом",a:"Экономический: человек = фактор производства, нормирование. Органический: человек = ресурс для развития, HR как стратегия. Гуманистический: человек = субъект с ценностями, культурная среда.",tag:"Б3 — УП"},
+  {q:"Способы разрешения конфликтов",a:"Уклонение → Сглаживание → Компромисс → Принуждение → Сотрудничество. Сотрудничество — наиболее эффективно для сложных конфликтов (win-win).",tag:"Б4 — Конфликты"},
+  {q:"Виды адаптации персонала",a:"Профессиональная (навыки). Психофизиологическая (режим, условия). Социально-психологическая (коллектив). Организационная (структура, правила). Экономическая (система оплаты).",tag:"Б4, Б9 — Адаптация"},
+  {q:"Теория ожиданий Врума",a:"Мотивация = Ожидание (усилие→результат) × Инструментальность (результат→вознаграждение) × Валентность (ценность вознаграждения). Все три множителя должны быть высокими.",tag:"Б9 — Мотивация"},
+  {q:"Иерархия потребностей Маслоу",a:"(снизу) Физиологические → Безопасность → Социальные → Уважение → Самоактуализация. Низшие потребности удовлетворяются первыми.",tag:"Б9, Б17 — Мотивация"},
+  {q:"Двухфакторная теория Герцберга",a:"Гигиенические факторы (зарплата, условия, безопасность) — предотвращают неудовлетворённость, но не мотивируют. Мотиваторы (достижение, признание, рост) — создают удовлетворённость.",tag:"Б9 — Мотивация"},
+  {q:"Теория справедливости Адамса",a:"Сотрудник сравнивает своё соотношение вклад/вознаграждение с коллегами. При несправедливости снижает вклад или требует повышения. Важна внутренняя справедливость оплаты.",tag:"Б9 — Мотивация"},
+  {q:"Функциональная vs Операционная стратегия",a:"Функциональная: 1–3 года, для подразделения (HR, финансы, маркетинг), отвечает 'что делать'. Операционная: краткосрочная, конкретные процедуры, отвечает 'как делать'.",tag:"Б5 — Стратегия"},
+  {q:"Система управления персоналом (СУП)",a:"Подсистемы: планирование и маркетинг → найм и учёт → оценка → развитие → мотивация → социальное развитие → нормативное обеспечение. Все подсистемы взаимосвязаны.",tag:"Б5, Б7 — СУП"},
+  {q:"Типы полномочий",a:"Линейные: прямые приказы подчинённым. Функциональные: обязательные указания в своей области. Штабные (рекомендательные): советы без права обязывать.",tag:"Б6 — Управление"},
+  {q:"Ключевые компетенции фирмы",a:"По Прахаладу и Хамелу: уникальные способности организации, трудно имитируемые конкурентами, создающие ценность для потребителей и открывающие доступ к широкому кругу рынков.",tag:"Б6 — Стратегия"},
+  {q:"Модели карьеры",a:"'Трамплин' — подъём до пика и удержание. 'Лестница' — 3–5 лет на ступень. 'Змея' — ротация между отделами (Япония). 'Перепутье' — аттестация каждые 5–8 лет: вверх / горизонталь / вниз.",tag:"Б6 — Карьера"},
+  {q:"Групповая сплочённость",a:"Степень привлекательности группы для членов. Повышают: малый размер, схожие ценности, частое взаимодействие, общий успех, внешняя угроза. Высокая сплочённость полезна, если нормы совпадают с целями организации.",tag:"Б7 — Группы"},
+  {q:"Комплексный показатель эффективности КП",a:"КП = Σ (Кi × Wi), где Кi — нормированный показатель (факт/план × 100%), Wi — вес (Σ = 1). КП ≥ 1,0 — план выполнен; 0,6–0,8 — средний; < 0,6 — низкий.",tag:"Б7, Б15 — Оценка"},
+  {q:"Культуры по Камерону и Куинну (OCAI)",a:"Клановая — семья, лояльность, наставничество. Адхократическая — инновации, риск, предпринимательство. Рыночная — результат, конкуренция. Иерархическая — порядок, формализация, контроль.",tag:"Б8 — Культура"},
+  {q:"Виды стратегических решений",a:"Предпринимательские — интуиция лидера (стартапы). Адаптивные — реакция на проблемы (нестабильный рынок). Планирующие — детальный анализ, формальные процедуры (крупные корпорации).",tag:"Б8 — Стратегия"},
+  {q:"Процедура отбора персонала (внешний источник)",a:"Объявление → Скрининг резюме → Телефонное интервью → Тестирование → Очное интервью → Ассессмент → Проверка рекомендаций → Оффер → Медосмотр → Оформление.",tag:"Б8 — Отбор"},
+  {q:"Сбалансированная система показателей (BSC)",a:"Четыре перспективы: Финансовая (ROI, EVA) → Клиентская (удовлетворённость, доля рынка) → Внутренние процессы → Обучение и развитие. Связывает стратегию с операционными показателями.",tag:"Б6, Б15 — СМ"},
+  {q:"Теория потребностей МакКлелланда",a:"Три ключевые потребности: в достижении (n-Ach), во власти (n-Pow), в принадлежности (n-Aff). Наиболее важны для мотивации руководителей.",tag:"Б9 — Мотивация"},
+  {q:"Элементы процесса коммуникации",a:"Источник → Кодирование → Сообщение → Канал → Декодирование → Получатель → Обратная связь. На всех этапах действует шум (помехи).",tag:"Б10 — Коммуникации"},
+  {q:"EVP — ценностное предложение работодателя",a:"Employer Value Proposition: что компания предлагает сотрудникам в обмен на труд и лояльность (зарплата, карьера, культура, условия, развитие). Основа маркетинга персонала.",tag:"Б10, Б17 — Маркетинг персонала"},
+  {q:"Принципы статической организации",a:"Приоритет цели; первичность функций над структурой; соответствие полномочий ответственности; единство распорядительства; диапазон контроля (5–7); иерархия.",tag:"Б11 — Теория организации"},
+  {q:"SMART-цели",a:"Specific (конкретная), Measurable (измеримая), Achievable (достижимая), Relevant (актуальная), Time-bound (ограниченная во времени). Операционализация стратегических намерений.",tag:"Б11 — Целеполагание"},
+  {q:"Методы преодоления сопротивления изменениям",a:"1) Образование и коммуникация. 2) Участие и вовлечение. 3) Поддержка и помощь. 4) Переговоры. 5) Манипуляция (включение лидеров сопротивления). 6) Принуждение (крайняя мера).",tag:"Б12 — Изменения"},
+  {q:"Научное администрирование vs HRM",a:"Тейлор: человек = рабочая сила, нормирование, сдельная оплата, краткосрочная эффективность. HRM: человек = стратегический актив, развитие, вовлечённость, долгосрочный потенциал.",tag:"Б12 — УП"},
+  {q:"Жизненный цикл организации",a:"Рождение → Рост → Зрелость → Упадок (или Обновление). Организация — открытая система. На каждой стадии меняются структура, культура и управленческие задачи.",tag:"Б13 — Теория организации"},
+  {q:"Виды диверсификации",a:"Связанная (родственная) — смежные отрасли, синергия. Несвязанная (конгломерат) — разные отрасли. Концентрическая — новые продукты для смежных рынков. Условие: избыток капитала или снижение риска.",tag:"Б13 — Стратегия"},
+  {q:"Современная концепция управления персоналом",a:"Человек — главное конкурентное преимущество. Аспекты: стратегическое партнёрство HR+бизнес; инвестиционный подход к персоналу; персонализация мотивации; управление талантами; цифровизация HR.",tag:"Б13 — УП"},
+  {q:"Роли менеджера по Минцбергу",a:"Межличностные: номинальный глава, лидер, связной. Информационные: приёмник информации, распространитель, пресс-агент. Решения: предприниматель, устранитель нарушений, распределитель ресурсов, переговорщик.",tag:"Б14 — Менеджер"},
+  {q:"Плановый подход к формированию HR-стратегии",a:"Систематический процесс: анализ → цели → HR-программы на 3–5 лет. Обеспечивает согласованность с бизнес-стратегией. Применим в крупных стабильных организациях.",tag:"Б14 — Стратегия УЧР"},
+  {q:"Модель Ульриха (HR-структура)",a:"Три столпа: HR бизнес-партнёры (стратегический уровень) + Центры экспертизы (T&D, C&B, рекрутинг) + HR Shared Services (административные функции). Разделяет стратегические и операционные роли.",tag:"Б14, Б16 — СУП"},
+  {q:"Общие функции менеджмента (Файоль)",a:"1) Планирование. 2) Организация. 3) Координирование. 4) Мотивация. 5) Контроль. Универсальны для любого менеджера. Специальные функции конкретизируют их по области.",tag:"Б15 — Функции менеджмента"},
+  {q:"Стратегический менеджмент: последовательность",a:"Анализ среды → Стратегические альтернативы → Оценка и выбор → Программы реализации → Распределение ресурсов → Мониторинг и пересмотр (сессии 1–2 раза в год).",tag:"Б15 — Стратегический менеджмент"},
+  {q:"Японская vs Американская модели менеджмента",a:"Япония: коллективизм, пожизненный найм, ротация, консенсус (ринги), кайдзен. США: индивидуализм, высокая мобильность, квартальные результаты, контракты, инновации.",tag:"Б16 — Международный менеджмент"},
+  {q:"Мотивация как система",a:"Потребность → Мотив → Поведение → Результат → Удовлетворённость → Новая потребность. Эффективная система мотивации учитывает индивидуальный профиль мотивов каждого сотрудника.",tag:"Б17 — Мотивация"},
+  {q:"Маркетинг персонала: внешний и внутренний",a:"Внешний: продвижение компании как работодателя (сайт, соцсети, ярмарки). Снижает cost per hire. Внутренний: удовлетворённость и удержание существующих сотрудников. EVP — ключевой инструмент.",tag:"Б17 — Маркетинг персонала"},
+  {q:"Бихевиористская теория (школа поведенческих наук)",a:"Мэйо (Хоторн), Маслоу, МакГрегор, Герцберг. Идеи: неформальные группы важны, социальные потребности влияют на продуктивность, стиль лидерства критичен.",tag:"Б18 — Теория менеджмента"},
+  {q:"Аттестация персонала",a:"Виды: очередная (1 раз в 3–5 лет), досрочная, после испытательного срока. Порядок: приказ → комиссия → характеристика → заседание → решение (соответствует / условно / не соответствует) → реализация.",tag:"Б18 — Аттестация"},
+  {q:"Коммерческие vs Некоммерческие организации",a:"Коммерческие (ООО, АО): цель — прибыль, оценка — финансовые показатели. Некоммерческие (НКО, фонды): цель — социальный эффект. Обе могут действовать в кризис через реструктуризацию и фокусирование.",tag:"Б19 — Организации"},
+  {q:"Кадровое планирование: методы определения потребности",a:"Нормирование: объём/норма. Экстраполяция: исторические тенденции. Регрессионный анализ: зависимость от объёма продаж. Экспертный. Метод Дельфи (итеративный опрос экспертов).",tag:"Б19 — Кадровое планирование"},
+  {q:"Барьеры входа в отрасль",a:"Эффект масштаба, дифференциация продукта/бренд, потребность в капитале, доступ к каналам сбыта, патенты, государственное регулирование, опытная кривая. Высокие барьеры = выше рентабельность для действующих.",tag:"Б19 — Стратегия"},
+  {q:"Количественная теория менеджмента",a:"С 1950-х. Инструменты: линейное программирование, теория очередей, теория игр, имитационное моделирование. Объективна, измерима. Недостатки: игнорирует человека, требует данных и экспертов.",tag:"Б20 — Теория менеджмента"},
+  {q:"Деловая оценка персонала",a:"Методы: MBO (по целям), BARS (поведенческие шкалы), ранжирование, 360°, ассессмент, поведенческие интервью. Критерии: KPI + качество + инициатива + командная работа + ценности.",tag:"Б20 — Оценка персонала"},
+  {q:"HR-стратегия и деловая стратегия",a:"Дифференциация → творческие высококвалифицированные сотрудники. Лидерство по издержкам → производительная управляемая рабочая сила. Фокусирование → глубокие специальные компетенции.",tag:"Б20 — Стратегия УЧР"},
+];
+
+// ================================================================
+// CHEAT TOPICS
+// ================================================================
+const CHEATS = [
+  {title:"Теории менеджмента",content:`<p><b>Классическая</b> (Тейлор, Файоль, Вебер): разделение труда, единоначалие, нормирование, 14 принципов Файоля. Акцент на формальных структурах.</p><p><b>Бихевиористская</b> (Мэйо, Маслоу, МакГрегор): производительность зависит от соц. отношений, неформальные группы важны.</p><p><b>Количественная</b> (с 1950-х): математические модели, линейное программирование, теория очередей. Объективна, но игнорирует людей.</p><p><b>Системный и ситуационный подходы</b>: организация — открытая система, нет универсальных решений, всё зависит от ситуации.</p>`},
+  {title:"SWOT, PEST, БКГ, Портер",content:`<p><b>PEST</b>: Political, Economic, Social, Technological — анализ макросреды.</p><p><b>SWOT</b>: Strengths (сильные) + Weaknesses (слабые) vs Opportunities (возможности) + Threats (угрозы). SO = потенциал, WT = риски.</p><p><b>Матрица БКГ</b>: Звёзды (высок.рост, высок.доля) → Дойные коровы → Вопросы → Собаки.</p><p><b>5 сил Портера</b>: соперничество + новые игроки + субституты + поставщики + покупатели.</p>`},
+  {title:"Виды стратегий",content:`<p><b>По Портеру</b>: Лидерство по издержкам / Дифференциация / Фокусирование (на нише).</p><p><b>По Ансоффу</b>: Проникновение на рынок / Развитие рынка / Развитие продукта / Диверсификация.</p><p><b>Уровни</b>: Корпоративная → Деловая → Функциональная → Операционная.</p><p><b>Наступательные</b>: Фронтальная / Фланговая / Обходной манёвр / Партизанская.</p><p><b>На внешнем рынке</b>: Многонациональная (адаптация) / Глобальная (стандарт) / Транснациональная (баланс).</p>`},
+  {title:"Теории мотивации",content:`<p><b>Содержательные:</b></p><p>Маслоу: Физиол.→Безопасность→Соц.→Уважение→Самоакт.</p><p>Герцберг: Гигиенические (не мотивируют, но убирают неудовлетворённость) + Мотиваторы (рост, признание).</p><p>МакКлелланд: Достижение + Власть + Принадлежность.</p><p><b>Процессуальные:</b></p><p>Врум: М = Ожидание × Инструментальность × Валентность.</p><p>Адамс: справедливость вклад/вознаграждение vs коллеги.</p><p>Локк: конкретные трудные цели повышают результативность.</p>`},
+  {title:"Управление конфликтами",content:`<p><b>Виды</b>: внутриличностный, межличностный, личность–группа, межгрупповой. Функциональный (полезный) и дисфункциональный.</p><p><b>Причины</b>: ресурсы, различие целей, плохие коммуникации, различие ценностей, неравенство.</p><p><b>Способы разрешения</b> (от неэффективного к эффективному): Уклонение → Сглаживание → Компромисс → Принуждение → Сотрудничество (win-win).</p><p><b>Дисфункц. последствия</b>: рост текучести, снижение производительности, ухудшение климата.</p>`},
+  {title:"Адаптация и профориентация",content:`<p><b>Виды адаптации</b>: Профессиональная (навыки) · Психофизиологическая (режим) · Социально-психологическая (коллектив) · Организационная (структура) · Экономическая (оплата).</p><p><b>Этапы</b>: Ознакомление → Приспособление → Ассимиляция → Идентификация.</p><p><b>Управление</b>: программа onboarding, наставник, краткосрочные цели, встречи через 1 / 3 / 6 мес.</p>`},
+  {title:"Система управления персоналом (СУП)",content:`<p><b>Подсистемы</b>: планирование и маркетинг → найм и учёт → оценка → развитие → мотивация → соц. развитие → нормативное обеспечение.</p><p><b>Методы построения</b>: системный анализ, метод аналогий, экспертно-аналитический, нормативный, параметрический.</p><p><b>По размеру</b>: малые (руководитель/1 специалист) → средние (3–7 чел.) → крупные (функциональная специализация) → холдинги (HR-центр + HR-BP).</p><p><b>Норматив</b>: 1–1,5 HR на 100 сотрудников.</p>`},
+  {title:"Карьера и оценка персонала",content:`<p><b>Модели карьеры</b>: Трамплин (СССР) · Лестница (3–5 лет/ступень) · Змея (ротация, Япония) · Перепутье (аттестация каждые 5–8 лет).</p><p><b>Аттестация</b>: 1 раз в 3–5 лет. Решения: соответствует / условно / не соответствует.</p><p><b>Деловая оценка</b>: MBO, 360°, BARS, ассессмент. Критерии: KPI + поведение + ценности.</p><p><b>Комплексный показатель</b>: КП = Σ (Кi × Wi). ≥ 1,0 — отлично.</p>`},
+  {title:"Организационные изменения",content:`<p><b>Типы</b>: стратегические, структурные, технологические, культурные, кадровые.</p><p><b>Модель Левина</b>: Размораживание → Движение → Замораживание.</p><p><b>Причины сопротивления</b>: страх потери, неопределённость, инерция, недоверие.</p><p><b>Методы преодоления</b> (Коттер): Образование → Участие → Поддержка → Переговоры → Манипуляция → Принуждение.</p>`},
+  {title:"Национальные модели менеджмента",content:`<p><b>Японская</b>: пожизненный найм, медленное продвижение, ротация ('змея'), решения консенсусом (ринги), кайдзен, 5S, lean. Сила: качество и лояльность.</p><p><b>Американская</b>: индивидуализм, мобильность кадров, квартальные результаты, контракты, формальные процедуры. Сила: инновации и предпринимательство.</p><p><b>Международные стратегии</b>: многонациональная (адаптация) / глобальная (стандарт) / транснациональная (баланс).</p>`},
+];
+
+// ================================================================
+// STATE
+// ================================================================
+let state = {
+  mode: null,
+  ticketNum: null,
+  questions: [],
+  current: 0,
+  score: 0,
+  answered: false,
+  wrongAnswers: [],
+  startTime: null,
+  timerInterval: null,
+  flashIdx: 0,
+  flashCards: [...FLASHCARDS],
+  flashRatings: {0:0,1:0,2:0},
+  totalTests: 0,
+  bestPct: null,
+  streak: 0,
+};
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ================================================================
+// TICKET GRID
+// ================================================================
+function buildTicketGrid() {
+  const grid = document.getElementById('ticket-grid');
+  grid.innerHTML = '';
+  for (let i=1; i<=20; i++) {
+    const btn = document.createElement('div');
+    btn.className = 'ticket-btn';
+    btn.textContent = i;
+    btn.onclick = () => startTicket(i);
+    grid.appendChild(btn);
+  }
+}
+
+function startTicket(n) {
+  const qs = QUESTIONS.filter(q => q.t === n);
+  startTest(qs, `ticket-${n}`, `Билет ${n}`);
+}
+
+// ================================================================
+// TEST ENGINE
+// ================================================================
+function startMode(mode) {
+  let qs;
+  if (mode === 'random') {
+    const shuffled = [...QUESTIONS].sort(() => Math.random()-.5);
+    qs = shuffled.slice(0,20);
+  } else {
+    qs = [...QUESTIONS].sort(() => Math.random()-.5);
+  }
+  startTest(qs, mode, mode === 'random' ? 'Случайный тест' : 'Полный тест');
+}
+
+function startTest(qs, mode, label) {
+  state.mode = mode;
+  state.questions = qs.sort(() => Math.random()-.5);
+  state.current = 0;
+  state.score = 0;
+  state.answered = false;
+  state.wrongAnswers = [];
+  state.startTime = Date.now();
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(updateTimer, 1000);
+  showScreen('screen-test');
+  renderQuestion();
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const m = Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s = (elapsed%60).toString().padStart(2,'0');
+  const el = document.getElementById('timer-badge');
+  el.textContent = `${m}:${s}`;
+  el.className = 'timer-badge' + (elapsed > 900 ? ' danger' : elapsed > 600 ? ' warn' : '');
+}
+
+function renderQuestion() {
+  const q = state.questions[state.current];
+  const total = state.questions.length;
+  const pct = (state.current / total * 100).toFixed(0);
+
+  document.getElementById('prog-text').textContent = `${state.current+1} / ${total}`;
+  document.getElementById('score-text').textContent = `✓ ${state.score}`;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('q-ticket-tag').textContent = `Билет ${q.t}`;
+  document.getElementById('question-text').textContent = q.q;
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  const letters = ['А','Б','В','Г'];
+  q.opts.forEach((opt, i) => {
+    const el = document.createElement('div');
+    el.className = 'option';
+    el.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    el.onclick = () => selectAnswer(i, q);
+    opts.appendChild(el);
+  });
+
+  document.getElementById('explanation').className = 'explanation';
+  document.getElementById('explanation').textContent = '';
+  document.getElementById('next-btn').style.display = 'none';
+  state.answered = false;
+}
+
+function selectAnswer(chosen, q) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const opts = document.querySelectorAll('.option');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if (i === q.ans) el.classList.add('correct');
+    if (i === chosen && chosen !== q.ans) el.classList.add('wrong');
+  });
+
+  const expEl = document.getElementById('explanation');
+  expEl.textContent = q.exp;
+  expEl.className = 'explanation show';
+
+  const nextBtn = document.getElementById('next-btn');
+  if (chosen === q.ans) {
+    state.score++;
+    nextBtn.className = 'next-btn green';
+    nextBtn.textContent = state.current < state.questions.length - 1 ? '✓ Правильно! Дальше →' : '✓ Завершить';
+  } else {
+    state.wrongAnswers.push({q: q.q, your: q.opts[chosen], correct: q.opts[q.ans], exp: q.exp});
+    nextBtn.className = 'next-btn';
+    nextBtn.textContent = state.current < state.questions.length - 1 ? '→ Следующий' : 'Завершить';
+  }
+  nextBtn.style.display = 'block';
+}
+
+function nextQuestion() {
+  state.current++;
+  if (state.current >= state.questions.length) {
+    finishTest();
+  } else {
+    renderQuestion();
+  }
+}
+
+function finishTest() {
+  clearInterval(state.timerInterval);
+  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const total = state.questions.length;
+  const pct = Math.round(state.score / total * 100);
+
+  state.totalTests++;
+  if (state.bestPct === null || pct > state.bestPct) state.bestPct = pct;
+  if (pct >= 60) state.streak++; else state.streak = 0;
+
+  updateHomeStats();
+  showResult(pct, total, elapsed);
+}
+
+function showResult(pct, total, elapsed) {
+  let emoji, label, cls;
+  if (pct >= 85) { emoji='🏆'; label='Отлично! Сдашь на 5!'; cls='great'; }
+  else if (pct >= 70) { emoji='👍'; label='Хорошо! Ещё немного!'; cls='great'; }
+  else if (pct >= 60) { emoji='😅'; label='Проходной балл. Повтори слабые темы.'; cls='ok'; }
+  else { emoji='📚'; label='Нужно ещё поучить!'; cls='bad'; }
+
+  document.getElementById('res-emoji').textContent = emoji;
+  document.getElementById('res-score').textContent = pct + '%';
+  document.getElementById('res-score').className = 'result-score ' + cls;
+  document.getElementById('res-label').textContent = label;
+  document.getElementById('res-correct').textContent = state.score;
+  document.getElementById('res-wrong').textContent = total - state.score;
+  const m = Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s = (elapsed%60).toString().padStart(2,'0');
+  document.getElementById('res-time').textContent = `${m}:${s}`;
+
+  const wrongsList = document.getElementById('wrongs-list');
+  wrongsList.innerHTML = '';
+  if (state.wrongAnswers.length > 0) {
+    const h = document.createElement('div');
+    h.style.cssText = 'font-weight:700;font-size:15px;margin-bottom:10px;margin-top:4px;color:var(--sub)';
+    h.textContent = `Ошибки (${state.wrongAnswers.length}):`;
+    wrongsList.appendChild(h);
+    state.wrongAnswers.forEach(w => {
+      const item = document.createElement('div');
+      item.className = 'wrong-item';
+      item.innerHTML = `<div class="wq">${w.q}</div><div class="wy">✗ Твой ответ: ${w.your}</div><div class="wc">✓ Правильно: ${w.correct}</div><div class="we">${w.exp}</div>`;
+      wrongsList.appendChild(item);
+    });
+  }
+
+  showScreen('screen-result');
+}
+
+function retryTest() {
+  if (state.mode === 'random') startMode('random');
+  else if (state.mode === 'all') startMode('all');
+  else if (state.mode.startsWith('ticket-')) startTicket(parseInt(state.mode.split('-')[1]));
+}
+
+function exitTest() {
+  clearInterval(state.timerInterval);
+  showScreen('screen-home');
+}
+
+// ================================================================
+// FLASHCARDS
+// ================================================================
+function initFlash() {
+  state.flashIdx = 0;
+  state.flashRatings = {0:0,1:0,2:0};
+  renderFlash();
+}
+
+function renderFlash() {
+  const card = state.flashCards[state.flashIdx];
+  document.getElementById('flash-q').textContent = card.q;
+  document.getElementById('flash-a').textContent = card.a;
+  document.getElementById('flash-tag-f').textContent = card.tag;
+  document.getElementById('flash-tag-b').textContent = card.tag;
+  document.getElementById('flash-counter').textContent = `${state.flashIdx+1} / ${state.flashCards.length}`;
+  document.getElementById('flash-card').classList.remove('flipped');
+  updateFlashStats();
+}
+
+function flipFlash() {
+  document.getElementById('flash-card').classList.toggle('flipped');
+}
+
+function prevFlash() {
+  if (state.flashIdx > 0) { state.flashIdx--; renderFlash(); }
+}
+
+function nextFlash() {
+  if (state.flashIdx < state.flashCards.length - 1) { state.flashIdx++; renderFlash(); }
+}
+
+function rateFlash(rating) {
+  state.flashRatings[rating]++;
+  updateFlashStats();
+  nextFlash();
+}
+
+function shuffleFlash() {
+  state.flashCards = [...FLASHCARDS].sort(() => Math.random()-.5);
+  state.flashIdx = 0;
+  renderFlash();
+}
+
+function updateFlashStats() {
+  document.getElementById('flash-bad').textContent = state.flashRatings[0];
+  document.getElementById('flash-ok').textContent = state.flashRatings[1];
+  document.getElementById('flash-good').textContent = state.flashRatings[2];
+}
+
+// ================================================================
+// CHEATSHEET
+// ================================================================
+function buildCheat() {
+  const list = document.getElementById('cheat-list');
+  list.innerHTML = '';
+  CHEATS.forEach((c, i) => {
+    const item = document.createElement('div');
+    item.className = 'cheat-item';
+    item.innerHTML = `
+      <div class="cheat-header" onclick="toggleCheat(${i})">
+        <span>${c.title}</span>
+        <span class="cheat-chevron" id="chev-${i}">▼</span>
+      </div>
+      <div class="cheat-body" id="cbody-${i}">${c.content}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function toggleCheat(i) {
+  const body = document.getElementById(`cbody-${i}`);
+  const chev = document.getElementById(`chev-${i}`);
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+// ================================================================
+// HOME STATS
+// ================================================================
+function updateHomeStats() {
+  document.getElementById('stat-best').textContent = state.bestPct !== null ? state.bestPct+'%' : '—';
+  document.getElementById('stat-tests').textContent = state.totalTests;
+  document.getElementById('stat-streak').textContent = state.streak;
+}
+
+// ================================================================
+// INIT
+// ================================================================
+buildTicketGrid();
+buildCheat();
+initFlash();
+</script>
+</body>
+</html>
